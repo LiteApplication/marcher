@@ -1,0 +1,8 @@
+[package]
+name = "marcher"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.104"
+glium = "0.36.0"
