@@ -1,6 +1,6 @@
 use std::f32::consts::PI;
 
-const SPEED: f32 = 1.0;
+const SPEED: f32 = 5.0;
 const SENSITIVITY: f32 = 1.0 / 500.0;
 const PITCH_MAX: f32 = 0.01; // between 0 and 1
 
@@ -24,7 +24,7 @@ impl Camera {
     pub(crate) fn new() -> Self {
         Camera {
             position: [0.0, 0.0, 0.0],
-            rotation: [0.0, 0.0],
+            rotation: [0.0, PI],
         }
     }
 
@@ -93,11 +93,9 @@ impl Camera {
         self.rotation[0] += d_pitch;
         if self.rotation[0] < (-PI / 2.0) * (1.0 - PITCH_MAX) {
             self.rotation[0] = (-PI / 2.0) * (1.0 - PITCH_MAX);
-            println!("locked d_pitch up");
         }
         if self.rotation[0] > (PI / 2.0) * (1.0 - PITCH_MAX) {
             self.rotation[0] = (PI / 2.0) * (1.0 - PITCH_MAX);
-            println!("locked d_pitch down");
         }
         self.rotation[1] += d_yaw;
         self.rotation[1] %= 2.0 * PI;

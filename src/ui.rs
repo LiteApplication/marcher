@@ -1,5 +1,6 @@
 mod camera;
 
+use super::fragment_shader_builder::FragmentBuilder;
 use std::{collections::HashMap, fs};
 
 use glium::{
@@ -32,7 +33,10 @@ pub(crate) struct Application {
 }
 
 impl Application {
-    pub fn build(event_loop: &EventLoop<()>) -> Result<Application> {
+    pub fn build(
+        event_loop: &EventLoop<()>,
+        fragment_builder: impl FragmentBuilder,
+    ) -> Result<Application> {
         //let (window, display) =
         //    glium::backend::glutin::SimpleWindowBuilder::new().build(event_loop);
         let (window, display) =
@@ -45,7 +49,8 @@ impl Application {
 
         let vertex_buffer = Self::create_fragment_display(&display)
             .context("could not create the fragment display")?;
-        let shader = Self::init_shader(&display).context("could not initialize the shader")?;
+        let shader = Self::init_shader(&display, fragment_builder)
+            .context("could not initialize the shader")?;
         let camera = camera::Camera::new();
 
         Ok(Application {
@@ -95,17 +100,16 @@ impl Application {
 
     fn init_shader(
         display: &glium::backend::glutin::Display<WindowSurface>,
+        fragment_builder: impl FragmentBuilder,
     ) -> anyhow::Result<glium::Program> {
         // Start by loading the shaders' code
         let vertex_shader_src = fs::read_to_string("shaders/simple/vertex.glsl")
             .context("could not read the vertex shader file")?;
-        let fragment_shader_src = fs::read_to_string("shaders/simple/fragment.glsl")
-            .context("could not read the fragment shader file")?;
 
         let program = glium::Program::from_source(
             display,
             vertex_shader_src.as_str(),
-            fragment_shader_src.as_str(),
+            &fragment_builder.export(),
             None,
         )
         .context("could not compile shaders")?;
