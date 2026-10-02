@@ -33,7 +33,6 @@ struct Material {{
 //const Material MATERIAL_LIST[...] = ...
 {material_list_definition};
 
-
 vec3 rotateVector(vec3 vec) {{
     return camera_rotation_mat * vec;
 }}
@@ -46,7 +45,6 @@ float smoothMerge(float shapeA, float shapeB, float k) {{
 vec3 reflectVector(vec3 Ri, vec3 Normal) {{
     return Ri - 2.0 * dot(Ri, Normal) * Normal;
 }}
-
 
 // A distance function per object
 {scene_objects_function_definition}
@@ -69,7 +67,6 @@ CollisionInfo getCollision(vec3 ray) {{
 
     {collision_checks}
 
-
     if (collisionInfo.hit) {{
         // Temporary, will change later
         vec3 lightDir = normalize(vec3(0.5, 0.75, -0.4));
@@ -83,77 +80,77 @@ CollisionInfo getCollision(vec3 ray) {{
         collisionInfo.lightColor = ambientLight + (lightColorSource * diffuseIntensity);
     }}
 
-
     return collisionInfo;
 }}
 
-//SDF
+// SDF
 float sdf_scene(vec3 ray) {{
     return {scene_unified_sdf};
 }}
-
 
 vec3 calculateColor(CollisionInfo collision[MAX_REFLECTION], vec3 bgColor) {{
     vec3 finalColor = vec3(0.0);
     vec3 remaining = vec3(1.0);
 
     for (int i = 0; i < MAX_REFLECTION; i++) {{
-            // If this bounce missed everything, add the sky color multiplied
-            // by the current light throughput, and terminate.
-            if (!collision[i].hit) {{
-                finalColor += remaining * bgColor;
-                break;
-            }}
-
-            Material mat = MATERIAL_LIST[collision[i].materialId];
-
-            // Collect the local lighting at this surface, tinted by its color
-            // and scaled by how much light remains.
-            vec3 surfaceLitColor = collision[i].lightColor * mat.color;
-
-            // Add it to the final pixel color, taking diffuse lighting into account
-            // for now the inverse of reflection, might change later for a separate field.
-            finalColor += remaining * surfaceLitColor * (1.0 - mat.reflection);
-
-            // Reduce the light left for the next bounce based on
-            // the reflection factor and surface color.
-            remaining *= mat.color * mat.reflection;
-
-
-            // If there is not enough light remaining for the ray we stop there
-            if (dot(remaining, remaining) < 0.0001) {{
-                break;
-            }}
+        // If this bounce missed everything, add the sky color multiplied
+        // by the current light throughput, and terminate.
+        if (!collision[i].hit) {{
+            finalColor += remaining * bgColor;
+            break;
         }}
+
+        Material mat = MATERIAL_LIST[collision[i].materialId];
+
+        // Collect the local lighting at this surface, tinted by its color
+        // and scaled by how much light remains.
+        vec3 surfaceLitColor = collision[i].lightColor * mat.color;
+
+        // Add it to the final pixel color, taking diffuse lighting into account
+        // for now the inverse of reflection, might change later for a separate field.
+        finalColor += remaining * surfaceLitColor * (1.0 - mat.reflection);
+
+        // Reduce the light left for the next bounce based on
+        // the reflection factor and surface color.
+        remaining *= mat.color * mat.reflection;
+
+        // If there is not enough light remaining for the ray we stop there
+        if (dot(remaining, remaining) < 0.0001) {{
+            break;
+        }}
+    }}
 
     return finalColor;
 }}
 
 vec3 raymarch(vec3 ro, vec3 rd) {{
-    CollisionInfo[MAX_REFLECTION] collision;
-    int reflection = 0;
-    int i = 0;
-    float dist = 0.0;
-    for (int j = 0; j < MAX_REFLECTION; j++) collision[j].hit = false;
-    for (reflection = 0; reflection < MAX_REFLECTION; reflection++) {{
+    CollisionInfo collision[MAX_REFLECTION];
+
+    for (int j = 0; j < MAX_REFLECTION; j++) {{
+        collision[j].hit = false;
+    }}
+
+    for (int reflection = 0; reflection < MAX_REFLECTION; reflection++) {{
         bool hitThisBounce = false;
         float total_dist = 0.0;
-        for(i = 0; i < MAX_STEPS; i++) {{
+
+        for (int i = 0; i < MAX_STEPS; i++) {{
             vec3 p = ro + rd * total_dist;
-            dist = sdf_scene(p);
-            total_dist += dist;
+            float dist = sdf_scene(p);
 
-            if(total_dist >= MAX_DIST) {{
-                break;
-            }}
-
-            if(dist <= SURF_DIST) {{
+            if (dist <= SURF_DIST) {{
                 collision[reflection] = getCollision(p);
                 collision[reflection].hit = true;
                 hitThisBounce = true;
 
                 rd = reflect(rd, collision[reflection].surfaceNormal);
-                ro = p + collision[reflection].surfaceNormal * (SURF_DIST * 2.0);
+                ro = p + collision[reflection].surfaceNormal * NUDGE_AFTER_BOUNCE;
+                break;
+            }}
+
+            total_dist += dist;
+
+            if (total_dist >= MAX_DIST) {{
                 break;
             }}
         }}
@@ -163,16 +160,14 @@ vec3 raymarch(vec3 ro, vec3 rd) {{
         }}
     }}
 
-    return calculateColor(collision,vec3(0.21, 0.27, 0.31));
+    return calculateColor(collision, vec3(0.21, 0.27, 0.31));
 }}
-
 
 void main() {{
     vec2 uv = (gl_FragCoord.xy - 0.5 * screen_size) / screen_size.y;
-    //color = vec3(uv, 0.0);
 
     vec3 ray_origin = camera_position;
-    vec3 fragment_direction = normalize(vec3(uv.x, uv.y, -0.5));//-2.41));
+    vec3 fragment_direction = normalize(vec3(uv.x, uv.y, -1.0));
     vec3 ray_direction = rotateVector(fragment_direction);
 
     color = raymarch(ray_origin, ray_direction);
