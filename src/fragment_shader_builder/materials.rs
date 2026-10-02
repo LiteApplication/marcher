@@ -1,8 +1,8 @@
 mod colored_surface;
 
-use std::{collections::HashMap, rc::Rc};
+use std::rc::Rc;
 
-pub use colored_surface::SolidColoredSurface;
+pub use colored_surface::*;
 
 /// This trait represents some material that we will use inside the verted shader to
 pub trait Material {
@@ -16,10 +16,12 @@ pub trait Material {
     /// ```
     fn get_struct(&self) -> String {
         let (r, g, b) = self.get_color();
-        return format!("Material(vec3({r}, {g}, {b}))");
+        let reflection = self.get_reflection();
+        return format!("Material(vec3({r}, {g}, {b}), {reflection})");
     }
 
     fn get_color(&self) -> (f32, f32, f32);
+    fn get_reflection(&self) -> f32;
 }
 
 pub struct MaterialList {

@@ -1,7 +1,4 @@
-use std::sync::Mutex;
-
-pub mod object;
-pub use object::{InfiniteYPlane, SceneObject, Sphere};
+pub use super::object::*;
 
 use crate::fragment_shader_builder::materials::MaterialList;
 
@@ -53,12 +50,17 @@ impl Scene {
             .iter()
             .map(|obj| {
                 format!(
-                    "if ({}(ray) <= SURF_DIST) objectId = {};",
-                    obj.get_function_name(),
-                    "COLLISION_".to_string() + &obj.get_function_name()
+                    "if ({sdf_function_name}(ray) <= SURF_DIST * SURF_DIST_TOLERENCE) {{
+        collisionInfo.hit = true;
+        collisionInfo.materialId = {collision_id};
+        collisionInfo.surfaceNormal = {surface_normals};
+    }}",
+                    sdf_function_name = obj.get_function_name(),
+                    collision_id = "COLLISION_".to_string() + &obj.get_function_name(),
+                    surface_normals = obj.get_normal()
                 )
             })
             .collect::<Vec<_>>()
-            .join("\n    ")
+            .join("\n    else ") // Stop at the first light hit
     }
 }

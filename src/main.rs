@@ -2,8 +2,8 @@ use fragment_shader_builder::TestFragmentBuilder;
 
 use crate::fragment_shader_builder::{
     FragmentBuilder,
-    materials::{MaterialList, SolidColoredSurface},
-    scene::{InfiniteYPlane, Scene, SceneObject, Sphere},
+    materials::{MaterialList, ReflectiveColoredSurface, SolidColoredSurface},
+    scene::{BoxObject, InfiniteYPlane, Scene, Sphere},
 };
 
 #[macro_use]
@@ -26,12 +26,16 @@ fn main() {
     );
     materials.add_material(
         "colored_thingy2".to_string(),
-        SolidColoredSurface::build(1.0, 0.5, 1.0).unwrap(),
+        ReflectiveColoredSurface::build(1.0, 0.5, 1.0, 0.2).unwrap(),
     );
 
     materials.add_material(
         "floor".to_string(),
         SolidColoredSurface::build(0.7, 1.0, 0.8).unwrap(),
+    );
+    materials.add_material(
+        "colored_thingy3".to_string(),
+        SolidColoredSurface::build(1.0, 1.0, 1.0).unwrap(),
     );
 
     let mut scene = Scene::new();
@@ -61,6 +65,17 @@ fn main() {
         -0.5,
         materials.get_material(&"floor".to_string()).unwrap(),
     ));
+
+    scene.add_object(
+        BoxObject::build(
+            [0.0, 3.0, 0.0],
+            [0.5, 0.5, 0.5],
+            materials
+                .get_material(&"colored_thingy3".to_string())
+                .unwrap(),
+        )
+        .unwrap(),
+    );
     let fragment_builder = TestFragmentBuilder::new(materials, scene);
 
     fragment_builder.debug_print();

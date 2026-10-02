@@ -1,9 +1,7 @@
-use crate::fragment_shader_builder::{
-    materials::MaterialList,
-    scene::{Scene, SceneObject},
-};
+use crate::fragment_shader_builder::{materials::MaterialList, scene::Scene};
 
 pub mod materials;
+pub mod object;
 pub mod scene;
 
 /// This is the trait that will build the vertex shader, which when executed will do all the rendering of the scene
