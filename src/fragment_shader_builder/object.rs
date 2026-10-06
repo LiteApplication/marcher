@@ -15,7 +15,10 @@ fn get_new_id() -> u32 {
 pub trait SceneObject {
     /// Should return the formula for the SDF at a point called "ray".
     /// I recommend putting the formula in parenthesis to avoid problems with the operation order when combining shapes.
-    fn get_sdf(&self) -> String;
+    /// You should always define either [get_sdf] or [get_sdf_function], or the shader will not compile due to recursive function use
+    fn get_sdf(&self) -> String {
+        format!("{}(ray)", self.get_function_name())
+    }
     fn get_material(&self) -> &Rc<dyn Material>;
     /// Same as [get_sdf], here we define a default value to compute the normal automatically for shapes that don't define it
     /// It is still more efficient to define it exactly.
@@ -48,15 +51,15 @@ pub trait SceneObject {
 }
 
 pub struct ArbitraryObject {
-    raw_formula: String,
+    raw_function_body: String,
     material: Rc<dyn Material>,
     id: u32,
 }
 
 impl ArbitraryObject {
-    fn new(raw_formula: String, material: Rc<dyn Material>) -> Self {
+    fn new(raw_function_body: String, material: Rc<dyn Material>) -> Self {
         Self {
-            raw_formula,
+            raw_function_body,
             material,
             id: get_new_id(),
         }
@@ -72,8 +75,14 @@ impl SceneObject for ArbitraryObject {
         format!("sdf_arbitrary_{}", self.id)
     }
 
-    fn get_sdf(&self) -> String {
-        self.raw_formula.clone()
+    fn get_sdf_function(&self) -> String {
+        format!(
+            "float {function_name}(vec3) {{
+    {body}
+}}",
+            function_name = self.get_function_name(),
+            body = self.raw_function_body
+        )
     }
 }
 
@@ -228,8 +237,13 @@ float {func_name}(vec3 ray){{
         )
     }
 
-    // Because it is a multi-line function we call it directly instead of inlining it
-    fn get_sdf(&self) -> String {
-        format!("{}(ray)", self.get_function_name())
+    fn get_normal(&self) -> String {
+        let q = format!(
+            "(({var} - {c}) / {e})",
+            var = "ray",
+            c = self.vec3_center(),
+            e = self.vec3_extents()
+        );
+        format!("(sign({q}) * step(abs({q}).yzx, abs({q})) * step(abs({q}).zxy, abs({q})))")
     }
 }

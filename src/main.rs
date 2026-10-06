@@ -2,7 +2,7 @@ use fragment_shader_builder::TestFragmentBuilder;
 
 use crate::fragment_shader_builder::{
     FragmentBuilder,
-    materials::{MaterialList, ReflectiveColoredSurface, SolidColoredSurface},
+    materials::{MaterialList, MaterialPreset, PresetSurface},
     scene::{BoxObject, InfiniteYPlane, Scene, Sphere},
 };
 
@@ -22,20 +22,22 @@ fn main() {
 
     materials.add_material(
         "colored_thingy".to_string(),
-        SolidColoredSurface::build(0.0, 1.0, 1.0).unwrap(),
+        PresetSurface::from_preset(MaterialPreset::Gold),
     );
     materials.add_material(
         "colored_thingy2".to_string(),
-        ReflectiveColoredSurface::build(1.0, 0.5, 1.0, 0.2).unwrap(),
+        PresetSurface::from_preset(MaterialPreset::Iron),
     );
 
     materials.add_material(
         "floor".to_string(),
-        SolidColoredSurface::build(0.7, 1.0, 0.8).unwrap(),
+        PresetSurface::from_preset(MaterialPreset::PlasticWhite)
+            .with_roughness(0.0)
+            .unwrap(),
     );
     materials.add_material(
         "colored_thingy3".to_string(),
-        SolidColoredSurface::build(1.0, 1.0, 1.0).unwrap(),
+        PresetSurface::from_preset(MaterialPreset::Aluminum),
     );
 
     let mut scene = Scene::new();

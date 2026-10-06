@@ -1,8 +1,10 @@
 mod colored_surface;
+mod pbr;
 
 use std::rc::Rc;
 
 pub use colored_surface::*;
+pub use pbr::{MaterialPreset, PresetSurface};
 
 /// This trait represents some material that we will use inside the verted shader to
 pub trait Material {
@@ -15,13 +17,21 @@ pub trait Material {
     /// } Material;
     /// ```
     fn get_struct(&self) -> String {
-        let (r, g, b) = self.get_color();
-        let reflection = self.get_reflection();
-        return format!("Material(vec3({r}, {g}, {b}), {reflection})");
+        let (r, g, b) = self.get_albedo();
+        let metallic = self.get_metallic();
+        let roughness = self.get_roughness();
+        let ior = self.get_index_of_refraction();
+        let (e_r, e_g, e_b) = self.get_emission();
+        return format!(
+            "Material(vec3({r}, {g}, {b}), {metallic}, {roughness}, {ior}, vec3({e_r}, {e_g}, {e_b}))"
+        );
     }
 
-    fn get_color(&self) -> (f32, f32, f32);
-    fn get_reflection(&self) -> f32;
+    fn get_albedo(&self) -> (f32, f32, f32);
+    fn get_metallic(&self) -> f32;
+    fn get_roughness(&self) -> f32;
+    fn get_index_of_refraction(&self) -> f32;
+    fn get_emission(&self) -> (f32, f32, f32);
 }
 
 pub struct MaterialList {

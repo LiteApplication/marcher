@@ -15,7 +15,10 @@ pub trait FragmentBuilder {
         let _ = result
             .lines()
             .enumerate()
-            .map(|(number, line)| println!("{number:0width$} |{line}"))
+            .map(|(number, line)| {
+                let n = number + 1;
+                println!("{n:0width$} |{line}")
+            })
             .collect::<Vec<_>>();
     }
 }
