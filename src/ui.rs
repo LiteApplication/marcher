@@ -1,7 +1,7 @@
 mod camera;
 
 use super::fragment_shader_builder::FragmentBuilder;
-use std::{collections::HashMap, fs};
+use std::{collections::HashMap, fs, time::Instant};
 
 use glium::{
     Surface, VertexBuffer,
@@ -30,6 +30,7 @@ pub(crate) struct Application {
     camera: camera::Camera,
 
     last_cursor_position: PhysicalPosition<f32>,
+    start_time: Instant,
 }
 
 impl Application {
@@ -61,6 +62,7 @@ impl Application {
             pressed_keys: HashMap::new(),
             camera,
             last_cursor_position: PhysicalPosition { x: 0.0, y: 0.0 },
+            start_time: Instant::now(),
         })
     }
 
@@ -157,7 +159,8 @@ impl Application {
                 &uniform! {
                     screen_size: screen_size,
                     camera_position: self.camera.get_position(),
-                    camera_rotation_mat: self.camera.get_rotation_matrix()
+                    camera_rotation_mat: self.camera.get_rotation_matrix(),
+                    seed_time: self.start_time.elapsed().as_millis() as u32 // i don't care if it wraps around
                 },
                 &Default::default(),
             )

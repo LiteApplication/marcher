@@ -12,6 +12,7 @@ https://users.rust-lang.org/t/wgpu-wasm32-hide-lock-cursor/95648
 https://iquilezles.org/articles/distfunctions/
 > not needed for now but I think I will at some point
 https://stackoverflow.com/a/4275343/15860367
+https://www.reedbeta.com/blog/hash-functions-for-gpu-rendering/
 > formula for the reflectVector function
 https://paulbourke.net/geometry/reflected/
 > most of the lighting code is directly translated from here (at least at the time of writing this)
@@ -22,6 +23,7 @@ https://learnopengl.com/PBR/Theory
 https://stackoverflow.com/questions/75360978/i-need-help-understanding-the-ggx-normal-distribution-function
 https://www.cs.cornell.edu/~srm/publications/EGSR07-btdf.pdf
 https://learnopengl.com/PBR/Lighting // stole from code from this page
+https://www.pbr-book.org/3ed-2018/Monte_Carlo_Integration/2D_Sampling_with_Multidimensional_Transformations 
 > For some formulas in calculateColor
 https://www.scratchapixel.com/lessons/3d-basic-rendering/introduction-to-shading/reflection-refraction-fresnel.html
 > Went down a bit of a rabithole for this, apparently we are supposed to thank Stephen Hill for this function so thanks Stephen

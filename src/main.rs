@@ -26,7 +26,7 @@ fn main() {
     );
     materials.add_material(
         "colored_thingy2".to_string(),
-        PresetSurface::from_preset(MaterialPreset::Iron),
+        PresetSurface::from_preset(MaterialPreset::EmissiveLight),
     );
 
     materials.add_material(
